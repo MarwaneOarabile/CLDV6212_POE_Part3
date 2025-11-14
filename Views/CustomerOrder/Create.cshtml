@@ -1,0 +1,133 @@
+﻿@model ABCRetailers_ST10436124.Models.ViewModels.CustomerOrderViewModel
+
+@{
+    ViewData["Title"] = "Create Order";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-plus"></i> Create New Order</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- Customer Information (Readonly) -->
+                    <div class="form-group mb-3">
+                        <label class="form-label">Customer</label>
+                        <input type="hidden" asp-for="CustomerId" />
+                        <input type="text" class="form-control" value="@Model.CustomerName" readonly />
+                        <small class="text-muted">Your account is automatically selected</small>
+                    </div>
+
+                    <!-- Product Selection -->
+                    <div class="form-group mb-3">
+                        <label asp-for="ProductId" class="form-label">Product</label>
+                        <select asp-for="ProductId" class="form-control" required>
+                            <option value="">-- Select Product --</option>
+                            @foreach (var product in Model.Products)
+                            {
+                                <option value="@product.RowKey"
+                                        data-price="@product.Price"
+                                        data-stock="@product.StockAvailable">
+                                    @product.ProductName - R@(product.Price) (Stock: @product.StockAvailable)
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="ProductId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="form-group mb-3">
+                        <label asp-for="Quantity" class="form-label">Quantity</label>
+                        <input asp-for="Quantity" type="number" class="form-control" min="1" value="1" required />
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                        <small class="text-muted" id="stockInfo">Select a product to see available stock</small>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-receipt"></i> Order Summary</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Unit Price:</strong>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span id="unitPrice">R0.00</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Total Price:</strong>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span id="totalPrice" class="fw-bold">R0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-check"></i> Place Order
+                        </button>
+                        <a asp-action="MyOrders" class="btn btn-secondary w-100 mt-2">
+                            <i class="fas fa-arrow-left"></i> Back to My Orders
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productSelect = document.getElementById('ProductId');
+            const quantityInput = document.getElementById('Quantity');
+            const unitPriceSpan = document.getElementById('unitPrice');
+            const totalPriceSpan = document.getElementById('totalPrice');
+            const stockInfo = document.getElementById('stockInfo');
+
+            function updateOrderSummary() {
+                const selectedOption = productSelect.options[productSelect.selectedIndex];
+                const price = selectedOption ? parseFloat(selectedOption.getAttribute('data-price')) || 0 : 0;
+                const stock = selectedOption ? parseInt(selectedOption.getAttribute('data-stock')) || 0 : 0;
+                const quantity = parseInt(quantityInput.value) || 0;
+                const total = price * quantity;
+
+                unitPriceSpan.textContent = `R${price.toFixed(2)}`;
+                totalPriceSpan.textContent = `R${total.toFixed(2)}`;
+
+                if (selectedOption && selectedOption.value) {
+                    stockInfo.textContent = `Available stock: ${stock}`;
+                    stockInfo.className = 'text-muted';
+
+                    if (quantity > stock) {
+                        stockInfo.textContent = `Insufficient stock! Only ${stock} available.`;
+                        stockInfo.className = 'text-danger';
+                    }
+                } else {
+                    stockInfo.textContent = 'Select a product to see available stock';
+                    stockInfo.className = 'text-muted';
+                }
+            }
+
+            productSelect.addEventListener('change', updateOrderSummary);
+            quantityInput.addEventListener('input', updateOrderSummary);
+
+            // Initial update
+            updateOrderSummary();
+        });
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

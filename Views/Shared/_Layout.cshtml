@@ -1,0 +1,248 @@
+﻿<!-- Views/Shared/_Layout.cshtml -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ABC Retailers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-store"></i> ABC Retailers
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home"
+                               asp-action="@(User.Identity.IsAuthenticated ? "Dashboard" : "Index")">
+                                <i class="fas fa-home"></i>
+                                @(User.Identity.IsAuthenticated ? "Dashboard" : "Home")
+                            </a>
+                        </li>
+
+                        <!-- Always show Products to everyone -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">
+                                <i class="fas fa-box"></i> Products
+                            </a>
+                        </li>
+
+                        <!-- Shopping Cart for Customers only -->
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Cart" asp-action="Index">
+                                    <i class="fas fa-shopping-cart"></i> Cart
+                                    <span id="cartItemCount" class="badge bg-danger rounded-pill">0</span>
+                                </a>
+                            </li>
+                        }
+
+                            <!-- Show these only to authenticated users -->
+                         @if (User.Identity.IsAuthenticated)
+                               {
+                                
+                            <!-- Customer Management (Admin only) -->
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Customer" asp-action="Index">
+                                        <i class="fas fa-users"></i> Customers
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- Order Management (Admin only) -->
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Order" asp-action="Index">
+                                        <i class="fas fa-shopping-cart"></i> Orders
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- Customer-specific order management -->
+                            @if (User.IsInRole("Customer"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="CustomerOrder" asp-action="MyOrders">
+                                        <i class="fas fa-list"></i> My Orders
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- Upload Files (Authenticated users only) -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Upload" asp-action="Index">
+                                    <i class="fas fa-upload"></i> Upload Files
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Always show Privacy -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                <i class="fas fa-shield-alt"></i> Privacy
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Authentication Section - Right Side -->
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle"></i> @User.Identity.Name
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <span class="badge bg-warning text-dark">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">Customer</span>
+                                    }
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Home"
+                                           asp-action="@(User.IsInRole("Admin") ? "AdminDashboard" : "CustomerDashboard")">
+                                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    @if (User.IsInRole("Customer"))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="CustomerOrder" asp-action="MyOrders">
+                                                <i class="fas fa-list"></i> My Orders
+                                            </a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-sign-out-alt"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Login" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt"></i> Login
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Login" asp-action="Register">
+                                    <i class="fas fa-user-plus"></i> Register
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <main role="main" class="pb-3">
+            <!-- Alert Messages -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted bg-light">
+        <div class="container">
+            <div class="row py-3">
+                <div class="col-md-6">
+                    &copy; 2025 - ABC Retailers - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                </div>
+                <div class="col-md-6 text-end">
+                    <i class="fas fa-store"></i> Connecting you to global deals and products
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <span class="badge bg-secondary ms-2">
+                            @(User.IsInRole("Admin") ? "Administrator" : "Customer")
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Cart item count update script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCount();
+        });
+
+        function updateCartCount() {
+            // Only try to update if user is authenticated
+            if ('@User.Identity.IsAuthenticated' === 'True') {
+                fetch('@Url.Action("GetCartItemCount", "Cart")')
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Network response was not ok.');
+                    })
+                    .then(data => {
+                        const cartItemCount = document.getElementById('cartItemCount');
+                        if (cartItemCount && data.success) {
+                            cartItemCount.textContent = data.cartItemCount;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching cart count:', error);
+                        // Set to 0 if there's an error
+                        const cartItemCount = document.getElementById('cartItemCount');
+                        if (cartItemCount) {
+                            cartItemCount.textContent = '0';
+                        }
+                    });
+            } else {
+                // Hide cart badge for non-authenticated users
+                const cartItemCount = document.getElementById('cartItemCount');
+                if (cartItemCount) {
+                    cartItemCount.style.display = 'none';
+                }
+            }
+        }
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

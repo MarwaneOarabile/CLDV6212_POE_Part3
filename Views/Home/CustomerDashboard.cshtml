@@ -1,0 +1,255 @@
+﻿@model IEnumerable<ABCRetailers_ST10436124.Models.Product>
+﻿@{
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-tachometer-alt"></i> Customer Dashboard</h2>
+            <div class="btn-group">
+                <a asp-controller="Product" asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag"></i> Shop Now
+                </a>
+                <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary">
+                    <i class="fas fa-shopping-cart"></i> View Cart
+                </a>
+            </div>
+        </div>
+
+        <!-- Welcome Card -->
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="card-title">Welcome back, @User.Identity.Name! 👋</h4>
+                        <p class="card-text mb-0">Ready to discover amazing products? Start shopping now!</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <i class="fas fa-shopping-bag fa-4x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-bag fa-2x text-primary mb-3"></i>
+                        <h5>Browse Products</h5>
+                        <p class="text-muted">Explore our latest products</p>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary btn-sm">Shop Now</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-shopping-cart fa-2x text-success mb-3"></i>
+                        <h5>My Cart</h5>
+                        <p class="text-muted">Manage your shopping cart</p>
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-success btn-sm">View Cart</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-receipt fa-2x text-info mb-3"></i>
+                        <h5>My Orders</h5>
+                        <p class="text-muted">Track your orders</p>
+                        <a asp-controller="Order" asp-action="Index" class="btn btn-outline-info btn-sm">View Orders</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-upload fa-2x text-warning mb-3"></i>
+                        <h5>Upload Payments</h5>
+                        <p class="text-muted">Submit proof of payment</p>
+                        <a asp-controller="Upload" asp-action="Index" class="btn btn-outline-warning btn-sm">Upload Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Products -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-fire"></i> Featured Products</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model != null && Model.Count() > 0)
+                        {
+                            <div class="row">
+                                @foreach (var product in Model)
+                                {
+                                    <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                                        <div class="card h-100">
+                                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                            {
+                                                <img src="@product.ImageUrl" class="card-img-top" alt="@product.ProductName" 
+                                                     style="height: 120px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                                     style="height: 120px;">
+                                                    <i class="fas fa-image fa-2x text-muted"></i>
+                                                </div>
+                                            }
+                                            <div class="card-body d-flex flex-column">
+                                                <h6 class="card-title">@product.ProductName</h6>
+                                                <p class="card-text small text-muted flex-grow-1">
+                                                    @(product.Description.Length > 50 ? 
+                                                      product.Description.Substring(0, 50) + "..." : 
+                                                      product.Description)
+                                                </p>
+                                                <div class="mt-auto">
+                                                    <p class="price text-success fw-bold mb-1">@product.Price.ToString("C")</p>
+                                                    <small class="text-muted">Stock: @product.StockAvailable</small>
+                                                    @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
+                                                    {
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-primary w-100 mt-2 add-to-cart-btn"
+                                                                data-product-id="@product.RowKey"
+                                                                data-product-name="@product.ProductName">
+                                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                <h5>Discover Amazing Products</h5>
+                                <p class="text-muted">Browse our collection of featured products</p>
+                                <a asp-controller="Product" asp-action="Index" class="btn btn-primary">
+                                    <i class="fas fa-arrow-right"></i> View All Products
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(productId, productName) {
+            document.getElementById('productName').textContent = productName;
+            document.getElementById('deleteForm').action = '/Product/Delete/' + productId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        // Event delegation for add to cart buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - setting up event listeners');
+
+            document.body.addEventListener('click', function(e) {
+                if (e.target.closest('.add-to-cart-btn')) {
+                    const button = e.target.closest('.add-to-cart-btn');
+                    const productId = button.getAttribute('data-product-id');
+                    const productName = button.getAttribute('data-product-name');
+
+                    console.log('Add to Cart button clicked!', {
+                        productId: productId,
+                        productName: productName,
+                        button: button
+                    });
+
+                    if (!productId || productId === 'null' || productId === '(null)') {
+                        console.error('Product ID is null or invalid:', productId);
+                        alert('Error: This product cannot be added to cart. Product ID is missing or invalid.');
+                        return;
+                    }
+
+                    addToCart(productId, productName);
+                }
+            });
+
+            // Also log all add to cart buttons on the page for debugging
+            const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+            console.log(`Found ${addToCartButtons.length} add to cart buttons on the page`);
+
+            addToCartButtons.forEach((button, index) => {
+                const productId = button.getAttribute('data-product-id');
+                const productName = button.getAttribute('data-product-name');
+                console.log(`Button ${index + 1}:`, { productId, productName });
+            });
+        });
+
+        function addToCart(productId, productName) {
+            console.log('addToCart function called with:', {
+                productId: productId,
+                productName: productName
+            });
+
+            fetch('@Url.Action("AddToCart", "Cart")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: 1
+                })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data received:', data);
+                if (data.success) {
+                    // Show success message
+                    const successAlert = `
+                        <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3"
+                             style="z-index: 1060;" role="alert">
+                            <i class="fas fa-check-circle"></i> ${productName} added to cart!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', successAlert);
+
+                    // Update cart count in navbar
+                    const cartBadge = document.getElementById('cartItemCount');
+                    if (cartBadge) {
+                        cartBadge.textContent = data.cartItemCount;
+                        console.log('Cart badge updated to:', data.cartItemCount);
+                    }
+
+                    // Auto-remove alert after 3 seconds
+                    setTimeout(() => {
+                        const alert = document.querySelector('.alert-success');
+                        if (alert) alert.remove();
+                    }, 3000);
+                } else {
+                    console.error('Server returned error:', data.message);
+                    alert('Error: ' + (data.message || 'Unable to add product to cart'));
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Network error adding product to cart. Please check the console for details.');
+            });
+        }
+    </script>
+}

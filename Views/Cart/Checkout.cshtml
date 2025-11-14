@@ -1,0 +1,158 @@
+﻿@model ABCRetailers_ST10436124.Models.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-credit-card"></i> Checkout</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Checkout" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <h5 class="mb-3">Delivery Information</h5>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="CollectionMethod" class="form-label"></label>
+                        <select asp-for="CollectionMethod" class="form-select" id="collectionMethod">
+                            <option value="Delivery">Home Delivery</option>
+                            <option value="Collection">Store Collection</option>
+                        </select>
+                        <span asp-validation-for="CollectionMethod" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3" id="shippingAddressGroup">
+                        <label asp-for="ShippingAddress" class="form-label"></label>
+                        <textarea asp-for="ShippingAddress" class="form-control" rows="3" placeholder="Enter your complete shipping address"></textarea>
+                        <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                        <div class="form-text">We'll deliver your order to this address</div>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Payment Method</h5>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="PaymentMethod" class="form-label"></label>
+                        <select asp-for="PaymentMethod" class="form-select" id="paymentMethod">
+                            <option value="Online">Online Payment</option>
+                            <option value="Cash">Cash on Delivery/Collection</option>
+                        </select>
+                        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="SpecialInstructions" class="form-label">Special Instructions (Optional)</label>
+                        <textarea asp-for="SpecialInstructions" class="form-control" rows="2" placeholder="Any special delivery instructions..."></textarea>
+                    </div>
+
+                    <div class="alert alert-info mt-4">
+                        <h6><i class="fas fa-info-circle"></i> Important Notes:</h6>
+                        <ul class="mb-0">
+                            <li id="paymentNoteOnline" style="display: none;">
+                                <strong>Online Payment:</strong> Please upload your proof of payment after placing the order in the "Upload" section.
+                            </li>
+                            <li id="paymentNoteCash" style="display: none;">
+                                <strong>Cash Payment:</strong> Please have the exact amount ready for the delivery person or at collection.
+                            </li>
+                            <li id="deliveryNote" style="display: none;">
+                                <strong>Delivery:</strong> Standard delivery takes 3-5 business days.
+                            </li>
+                            <li id="collectionNote" style="display: none;">
+                                <strong>Collection:</strong> Collect from our main store at 123 Retail Street, Johannesburg. Bring your order confirmation.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-check-circle"></i> Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+                @foreach (var item in Model.Cart.Items)
+                {
+                    <div class="d-flex justify-content-between align-items-start mb-3 pb-3 border-bottom">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">@item.ProductName</h6>
+                            <small class="text-muted">Qty: @item.Quantity × R @item.UnitPrice.ToString("F2")</small>
+                        </div>
+                        <div class="text-end">
+                            <strong>R @item.Subtotal.ToString("F2")</strong>
+                        </div>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal:</span>
+                    <span>R @Model.Cart.TotalAmount.ToString("F2")</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Shipping:</span>
+                    <span>R 0.00</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total:</strong>
+                    <strong class="text-success h5">R @Model.Cart.TotalAmount.ToString("F2")</strong>
+                </div>
+
+                <div class="alert alert-warning small">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Review your order:</strong> Please double-check your items and delivery information before placing the order.
+                </div>
+            </div>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-3">
+            <i class="fas fa-arrow-left"></i> Back to Cart
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function updateCheckoutNotes() {
+            const collectionMethod = document.getElementById('collectionMethod').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+
+            // Show/hide shipping address based on collection method
+            const shippingGroup = document.getElementById('shippingAddressGroup');
+            if (collectionMethod === 'Delivery') {
+                shippingGroup.style.display = 'block';
+            } else {
+                shippingGroup.style.display = 'none';
+            }
+
+            // Show/hide payment notes
+            document.getElementById('paymentNoteOnline').style.display = paymentMethod === 'Online' ? 'block' : 'none';
+            document.getElementById('paymentNoteCash').style.display = paymentMethod === 'Cash' ? 'block' : 'none';
+
+            // Show/hide delivery notes
+            document.getElementById('deliveryNote').style.display = collectionMethod === 'Delivery' ? 'block' : 'none';
+            document.getElementById('collectionNote').style.display = collectionMethod === 'Collection' ? 'block' : 'none';
+        }
+
+        document.getElementById('collectionMethod').addEventListener('change', updateCheckoutNotes);
+        document.getElementById('paymentMethod').addEventListener('change', updateCheckoutNotes);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', updateCheckoutNotes);
+    </script>
+}

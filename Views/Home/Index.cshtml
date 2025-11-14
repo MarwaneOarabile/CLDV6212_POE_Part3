@@ -1,0 +1,137 @@
+﻿@model ABCRetailers_ST10436124.Models.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="home text-center mb-5">
+    <h1 class="title">
+        <i class="fas fa-store"></i> Welcome to ABC Retailers!
+    </h1>
+    <p class="lead">Connecting you to best deals and latest products</p>
+</div>
+
+<!-- Show action buttons only to authenticated users -->
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="row mb-5">
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-md-3 mb-3">
+                <a asp-controller="Customer" asp-action="Index" class="btn-theme btn-blue">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <span>View Customers</span>
+                    <small>(@Model.CustomerCount total)</small>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a asp-controller="Order" asp-action="Index" class="btn-theme btn-orange">
+                    <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                    <span>View Orders</span>
+                    <small>(@Model.OrderCount total)</small>
+                </a>
+            </div>
+        }
+        <div class="col-md-3 mb-3">
+            <a asp-controller="Product" asp-action="Index" class="btn-theme btn-green">
+                <i class="fas fa-box fa-2x mb-2"></i>
+                <span>View Products</span>
+                <small>(@Model.ProductCount total)</small>
+            </a>
+        </div>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="col-md-3 mb-3">
+                <a asp-controller="Upload" asp-action="Index" class="btn-theme btn-purple">
+                    <i class="fas fa-upload fa-2x mb-2"></i>
+                    <span>Upload Files</span>
+                    <small>(Payment proofs)</small>
+                </a>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <!-- Show call to action for non-authenticated users -->
+    <div class="row mb-5">
+        <div class="col-md-6 offset-md-3 text-center">
+            <div class="card">
+                <div class="card-body py-5">
+                    <i class="fas fa-user-lock fa-4x text-primary mb-3"></i>
+                    <h3>Create an Account or Login</h3>
+                    <p class="text-muted mb-4">Sign in to access all features including shopping cart and order management</p>
+                    <div class="d-grid gap-2 d-md-block">
+                        <a asp-controller="Login" asp-action="Login" class="btn btn-primary me-md-2">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a asp-controller="Login" asp-action="Register" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Storage Initialization (Admin only) -->
+@if (User.IsInRole("Admin") && Model.CustomerCount == 0 && Model.ProductCount == 0 && Model.OrderCount == 0)
+{
+    <div class="alert-box alert-orange">
+        <h5><i class="fas fa-exclamation-triangle"></i> First Time Setup</h5>
+        <p>It looks like this is your first time running the application. Click below to initialize Azure Storage.</p>
+        <form asp-action="InitializeStorage" method="post">
+            <button type="submit" class="btn-theme btn-orange">
+                <i class="fas fa-cog"></i> Initialize Azure Storage
+            </button>
+        </form>
+    </div>
+}
+
+
+<!-- Featured Products -->
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4 subtitle">
+            <i class="fas fa-heart text-danger"></i> Featured Products
+        </h2>
+
+        @if (Model.FeaturedProducts.Any())
+        {
+            <div class="row justify-content-center">
+                @foreach (var product in Model.FeaturedProducts)
+                {
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                        <div class="card-theme">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" class="card-img-top" alt="@product.ProductName">
+                            }
+                            else
+                            {
+                                <div class="card-img-top placeholder">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            }
+                            <div class="card-body">
+                                <h6 class="card-title">@product.ProductName</h6>
+                                <p class="card-text small">
+                                    @(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)
+                                </p>
+                                <p class="price">@product.Price.ToString("C")</p>
+                                <small>Stock: @product.StockAvailable</small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert-box alert-blue">
+                <i class="fas fa-info-circle"></i> No products available yet.
+                <a asp-controller="Product" asp-action="Create" class="link-theme">Add your first product</a>!
+            </div>
+        }
+    </div>
+</div>
